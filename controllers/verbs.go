@@ -36,3 +36,10 @@ var GetVerb = func(w http.ResponseWriter, r *http.Request) {
 	resp["data"] = data
 	u.Respond(w, resp)
 }
+
+var GetVerbs = func(w http.ResponseWriter, r *http.Request) {
+	data := models.GetVerbs()
+	resp := u.Message(true, "success")
+	resp["data"] = data
+	u.Respond(w, resp)
+}

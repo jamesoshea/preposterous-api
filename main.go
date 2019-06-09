@@ -14,6 +14,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/verb/new", controllers.CreateVerb).Methods("POST")
+	router.HandleFunc("/api/verb", controllers.GetVerbs).Methods("GET")
 	router.HandleFunc("/api/verb/{id}", controllers.GetVerb).Methods("GET")
 
 	port := os.Getenv("PORT")

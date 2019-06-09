@@ -56,3 +56,9 @@ func GetVerb(u uint) *Verb {
 	}
 	return verb
 }
+
+func GetVerbs() *[]Verb {
+	verb := &[]Verb{}
+	GetDB().Table("verbs").Find(verb)
+	return verb
+}
