@@ -2,39 +2,57 @@ package models
 
 import (
 	"fmt"
-	"os"
+	u "preposterous/utils"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
 )
 
-var db *gorm.db
-
-func init() {
-	e := godotenv.Load()
-	if e != nil {
-		fmt.Print(e)
-	}
-
-	username := os.Getenv("db_user")
-	password := os.Getenv("db_pass")
-	dbName := os.Getenv("db_name")
-	dbHost := os.Getenv("db_host")
-
-	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%S", dbHost, username, dbName, password)
-	fmt.Println(dbUri)
-
-	conn, err := gorm.Open("postgres", dbUri)
-	if err != nil {
-		fmt.Print(err)
-	}
-
-	db = conn
-	db.Debug().AutoMigrate(&Account{}, &Contact{})
-
+type Verb struct {
+	gorm.Model
+	German          string
+	English         string
+	GrammaticalCase string
+	Preposition     string
 }
 
-func GetDB() *gorm.DB {
-	return db
+func (verb *Verb) Validate() (map[string]interface{}, bool) {
+	if len(verb.German) < 1 {
+		return u.Message(false, "German verb is required"), false
+	}
+	if len(verb.English) < 1 {
+		return u.Message(false, "English verb is required"), false
+	}
+	if len(verb.GrammaticalCase) != 1 {
+		return u.Message(false, "Grammatical case is required"), false
+	}
+	if len(verb.Preposition) < 1 {
+		return u.Message(false, "German preposition is required"), false
+	}
+	return u.Message(false, "Validation passed"), true
+}
+
+func (verb *Verb) Create() map[string]interface{} {
+	fmt.Print(verb.Validate())
+	if resp, ok := verb.Validate(); !ok {
+		return resp
+	}
+
+	GetDB().Create(verb)
+
+	if verb.ID <= 0 {
+		return u.Message(false, "Failed to create verb, database connection down")
+	}
+
+	response := u.Message(true, "Verb has been created")
+	response["verb"] = verb
+	return response
+}
+
+func GetVerb(u uint) *Verb {
+	verb := &Verb{}
+	GetDB().Table("verbs").Where("id = ?", u).First(verb)
+	if verb.German == "" {
+		return nil
+	}
+	return verb
 }
