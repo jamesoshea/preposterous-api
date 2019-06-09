@@ -48,7 +48,7 @@ func main() {
 
 	fmt.Println(port)
 
-	err = http.ListenAndServe(":"+port, router)
+	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
 		fmt.Print(err)
 	}
